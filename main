@@ -1,0 +1,269 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#ifdef _WIN32
+    #include <windows.h>
+    #include <conio.h>
+#else
+    #include <unistd.h>
+    #define Sleep(x) usleep((x)*1000)
+    #define getch() getchar()
+#endif
+
+void clearScreen() {
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
+}
+
+
+void sleepFor(int milliseconds) {
+    #ifdef _WIN32
+
+    #else
+        usleep(milliseconds * 1000);
+    #endif
+}
+
+#define ADMIN_PASS "admin123"
+#define MAX_VOTERS 100
+
+// Candidate definitions
+#define CANDIDATE1 "Nurzaman"
+#define CANDIDATE2 "Akash Hossain"
+#define CANDIDATE3 "Uttam Kumar"
+#define CANDIDATE4 "Reday"
+
+// Structure for voter
+struct Voter {
+    int id;
+    int hasVoted;
+    char timestamp[50];
+};
+
+// Global variables
+int votesCount1=0, votesCount2=0, votesCount3=0, votesCount4=0, spoiledtvotes=0;
+struct Voter voters[MAX_VOTERS];
+int totalVoters = 0;
+
+// Function to check if voter has already voted
+int hasVoted(int id) {
+    for(int i = 0; i < totalVoters; i++) {
+        if(voters[i].id == id && voters[i].hasVoted == 1) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// Function to get current timestamp
+void getCurrentTimestamp(char* timestamp) {
+    time_t now = time(NULL);
+    strftime(timestamp, 50, "%Y-%m-%d %H:%M:%S", localtime(&now));
+}
+
+void castVote() {
+    int choice;
+    int voterId;
+    char timestamp[50];
+    
+    clearScreen();
+    printf("\n\n\t\t=== VOTING BOOTH ===\n");
+    
+    // Voter ID verification
+    printf("\nEnter your Voter ID: ");
+    scanf("%d", &voterId);
+    
+    if(hasVoted(voterId)) {
+        printf("\n\tERROR: You have already cast your vote!\n");
+        Sleep(2000);
+        return;
+    }
+    
+    printf("\n\n\t=== Please choose your Candidate ===\n");
+    printf("\n\t1. %s", CANDIDATE1);
+    printf("\n\t2. %s", CANDIDATE2);
+    printf("\n\t3. %s", CANDIDATE3);
+    printf("\n\t4. %s", CANDIDATE4);
+    printf("\n\t5. None of These");
+    printf("\n\t6. Return to main menu");
+    
+    printf("\n\n\tInput your choice (1 - 6): ");
+    scanf("%d", &choice);
+
+ switch(choice)
+    {
+    case 1:
+        votesCount1++;
+        break;
+    case 2:
+        votesCount2++;
+        break;
+    case 3:
+        votesCount3++;
+        break;
+    case 4:
+        votesCount4++;
+        break;
+    case 5:
+        spoiledtvotes++;
+        break;
+    case 6:
+        return main();
+        break;
+    default:
+        printf("\n Error: Wrong Choice !! Please retry");
+    }
+    printf("\n Thanks for vote !!");
+}
+
+void votesCount() {
+    char password[20];
+    system("cls");
+    printf("\n\n\t\t=== VOTE COUNTING SYSTEM ===\n");
+    printf("\n\tEnter admin password: ");
+    scanf("%s", password);
+    
+    if(strcmp(password, ADMIN_PASS) != 0) {
+        printf("\n\tERROR: Invalid password! Access denied.\n");
+        Sleep(2000);
+        return;
+    }
+    
+    int totalVotes = votesCount1 + votesCount2 + votesCount3 + votesCount4 + spoiledtvotes;
+    
+    printf("\n\n\t=== Voting Statistics ===\n");
+    printf("\n\t%-20s : %d votes (%d%%)", CANDIDATE1, votesCount1, totalVotes ? (votesCount1 * 100) / totalVotes : 0);
+    printf("\n\t%-20s : %d votes (%d%%)", CANDIDATE2, votesCount2, totalVotes ? (votesCount2 * 100) / totalVotes : 0);
+    printf("\n\t%-20s : %d votes (%d%%)", CANDIDATE3, votesCount3, totalVotes ? (votesCount3 * 100) / totalVotes : 0);
+    printf("\n\t%-20s : %d votes (%d%%)", CANDIDATE4, votesCount4, totalVotes ? (votesCount4 * 100) / totalVotes : 0);
+    printf("\n\t%-20s : %d votes (%d%%)", "Spoiled Votes", spoiledtvotes, totalVotes ? (spoiledtvotes * 100) / totalVotes : 0);
+    printf("\n\t%-20s : %d votes", "Total Votes Cast", totalVotes);
+    
+    printf("\n\n\tPress any key to continue...");
+    getch();
+}
+
+void getLeadingCandidate()
+{
+    char password[20];
+    system("cls");
+    printf("\n\n\t\t=== LEADING CANDIDATE VIEW ===\n");
+    printf("\n\tEnter admin password: ");
+    scanf("%s", password);
+    
+    if(strcmp(password, ADMIN_PASS) != 0) {
+        printf("\n\tERROR: Invalid password! Access denied.\n");
+        Sleep(2000);
+        return;
+    }
+
+    printf("\n\n Leading Candiate \n");
+    if(votesCount1>votesCount2 && votesCount1>votesCount3 && votesCount1 >votesCount4)
+        printf("%s Congratulation \n",CANDIDATE1);
+    else if (votesCount2>votesCount3 && votesCount2>votesCount4 && votesCount2 >votesCount1)
+        printf("%sCongratulation \n",CANDIDATE2);
+    else if(votesCount3>votesCount4 && votesCount3>votesCount2 && votesCount3 >votesCount1)
+        printf("%s Congratulation\n",CANDIDATE3);
+    else if(votesCount4>votesCount1 && votesCount4>votesCount2 && votesCount4 >votesCount3)
+        printf("%s Congratulation\n",CANDIDATE4);
+    else
+        printf("----- Warning !!! No-win situation----");
+}
+
+void Exit()
+{
+    getchar();
+    printf("\n\t\tAre You Sure Want to Exit? (Yes=Y and no =any letter): ");
+    char YesOrNO;
+    scanf("%c",&YesOrNO);
+    if(YesOrNO == 'Y' || YesOrNO == 'y')
+    {
+        system("cls");
+        char ThankYou[200] = "=====Thanks For Using Voting System  =====\n";
+        char SeeYouSoon[100] = "=====See You Soon=====\n";
+        int i=0;
+        printf("\n\n\t\t\t\t");
+        for(i=0; i<strlen(ThankYou); i++)
+        {
+            printf("%c",ThankYou[i]);
+            Sleep(50);
+        }
+        printf("\n \t\t\t\t\t");
+        for(i=0; i<strlen(SeeYouSoon); i++)
+        {
+            printf("%c",SeeYouSoon[i]);
+            Sleep(50);
+        }
+       // isRunning =  false;
+    }
+}
+// Function to initialize the system
+void initSystem() {
+    for(int i = 0; i < MAX_VOTERS; i++) {
+        voters[i].id = 0;
+        voters[i].hasVoted = 0;
+    }
+}
+
+// Function to display animated welcome screen
+void displayWelcomeScreen() {
+    system("cls");
+    printf("\n\n\n\t\t\tLoading System");
+    for(int i = 0; i < 3; i++) {
+        Sleep(500);
+        printf(".");
+    }
+    Sleep(500);
+}
+
+int main() {
+    int choice;
+    
+    // Initialize system
+    initSystem();
+    system("color 0A"); // Green text on black background
+    
+    // Display welcome screen
+    displayWelcomeScreen();
+    
+    do {
+        system("cls");
+        printf("\n\t\t╔═══════════════════════════════════════════════════════════╗");
+        printf("\n\t\t║                                                           ║");
+        printf("\n\t\t║                Digital Voting System 2025                 ║");
+        printf("\n\t\t║                                                           ║");
+        printf("\n\t\t╚═══════════════════════════════════════════════════════════╝");
+
+        printf("\n\n\t\t\t=== Welcome to Digital Election 2025 ===\n");
+        printf("\n\t\t[1] ➜ Cast Your Vote");
+        printf("\n\t\t[2] ➜ View Vote Count [Admin Only]");
+        printf("\n\t\t[3] ➜ View Leading Candidate");
+        printf("\n\t\t[4] ➜ Exit System");
+        
+        printf("\n\n\t\tEnter your choice (1-4): ");
+        scanf("%d", &choice);
+       switch(choice)
+        {
+        case 1:
+            castVote();
+            break;
+        case 2:
+            votesCount();
+            break;
+        case 3:
+            getLeadingCandidate();
+            break;
+        case 4:
+            Exit();
+            break;
+        default:
+            printf("\n Wrong Choice ! try again later");
+        }
+    }
+    while(choice);
+    return 0;
+}
